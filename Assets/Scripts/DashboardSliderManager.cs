@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,6 +6,7 @@ public class DashboardSliderManager : MonoBehaviour
 {
     private AudioSource audioSource;
     private Slider volumeSlider;
+    private TMP_Text sliderLabel;
 
     void Awake()
     {
@@ -15,10 +17,11 @@ public class DashboardSliderManager : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         volumeSlider = GetComponentInChildren<Slider>();
+        sliderLabel = GetComponentInChildren<TMP_Text>();
 
-        if (audioSource == null || volumeSlider == null)
+        if (audioSource == null || volumeSlider == null || sliderLabel == null)
         {
-            Debug.LogError($"AudioManager: Missing components in {gameObject.name}!");
+            Debug.LogError($"DashboardSliderManager: Missing component!");
             return;
         }
 
@@ -27,11 +30,28 @@ public class DashboardSliderManager : MonoBehaviour
         audioSource.playOnAwake = true;
         audioSource.loop = true;
 
+        if (audioSource.clip != null)
+        {
+            sliderLabel.text = FormatAudioName(audioSource.clip.name);
+        }
+        else
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         volumeSlider.onValueChanged.AddListener(OnVolumeChanged);
     }
 
     void OnVolumeChanged(float volume)
     {
         audioSource.volume = volume;
+    }
+
+    private string FormatAudioName(string clipName)
+    {
+        string cleanedName = clipName.Replace(" - ", " ");
+        string[] words = cleanedName.Split(' ');
+        return string.Join("\n", words);
     }
 }
